@@ -1,13 +1,16 @@
 package learning.kirana_stores.services;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
+import org.springframework.cache.CacheManager;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
 
 @Service
+@EnableCaching
 public class CurrencyConvertionService {
 
     //@Value("${currency.api.url}")
@@ -18,6 +21,7 @@ public class CurrencyConvertionService {
      * @param targetCurrency
      * @return
      */
+    @Cacheable(cacheManager = "cacheManager",cacheNames = "conversionRatesCache")
     public BigDecimal getConversionRate (String sourceCurrency, String targetCurrency) {
         String url = apiUrl.replace ("{base}", sourceCurrency);
         RestTemplate restTemplate = new RestTemplate ();

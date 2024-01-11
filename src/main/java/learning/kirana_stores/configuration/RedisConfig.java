@@ -30,29 +30,29 @@ public class RedisConfig {
      * @return
      */
     @Bean
-    public CacheManager cacheManager (Config config) {
+    public CacheManager cacheManager1 (Config config) {
         CacheManager manager = Caching.getCachingProvider ().getCacheManager ();
         manager.createCache ("cache", RedissonConfiguration.fromConfig (config));
         return manager;
     }
 
     /**
-     * @param cacheManager
+     * @param cacheManager1
      * @return
      */
     @Bean
-    ProxyManager<String> proxyManager (CacheManager cacheManager) {
-        return new JCacheProxyManager<> (cacheManager.getCache ("cache"));
+    ProxyManager<String> proxyManager (CacheManager cacheManager1) {
+        return new JCacheProxyManager<> (cacheManager1.getCache ("cache"));
     }
 
     /**
-     * @param cacheManager
+     * @param cacheManager1
      * @return
      */
     @Bean
     @Primary
-    public SyncCacheResolver bucket4jCacheResolver (CacheManager cacheManager) {
-        return new JCacheCacheResolver (cacheManager);
+    public SyncCacheResolver bucket4jCacheResolver (CacheManager cacheManager1) {
+        return new JCacheCacheResolver (cacheManager1);
     }
 
 
