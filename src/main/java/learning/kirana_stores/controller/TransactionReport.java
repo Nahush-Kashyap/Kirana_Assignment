@@ -69,11 +69,11 @@ public class TransactionReport {
         double totalDebit = 0.0;
 
         for (Post report : reports) {
-            if ("CREDIT".equals(report.getTransactionType())) {
+            //if ("CREDIT".equals(report.getTransactionType())) {
                 totalCredit += report.getAmount().doubleValue(); // Convert BigDecimal to double
-            } else if ("DEBIT".equals(report.getTransactionType())) {
+            //} else if ("DEBIT".equals(report.getTransactionType())) {
                 totalDebit += report.getAmount().doubleValue(); // Convert BigDecimal to double
-            }
+            //}
         }
 
         double netFlow = totalCredit - totalDebit;
