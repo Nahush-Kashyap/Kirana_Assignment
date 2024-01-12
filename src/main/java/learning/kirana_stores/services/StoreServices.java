@@ -22,69 +22,72 @@ import java.util.List;
 @AllArgsConstructor
 public class StoreServices {
 
-    StoreRepository repo;
-
-
-    private CurrencyConvertionService currencyConvertionService;
-
+    private final StoreRepository repo;
+    private final CurrencyConvertionService currencyConvertionService;
 
     /**
-     * @return
+     * Retrieves all data from the store.
+     *
+     * @return ApiResponse containing the status and data.
      */
-    public ApiResponse ReadAllData () {
-        List<Post> posts = repo.findAll ();
-        ApiResponse apiResponse = new ApiResponse ();
-        if (posts.isEmpty ()) {
-            apiResponse.setStatus ("DATA NOT FOUND");
-            apiResponse.setStatusCode ("404");
-            apiResponse.setError ("No data found");
+    public ApiResponse ReadAllData() {
+        List<Post> posts = repo.findAll();
+        ApiResponse apiResponse = new ApiResponse();
+        if (posts.isEmpty()) {
+            apiResponse.setStatus("DATA NOT FOUND");
+            apiResponse.setStatusCode("404");
+            apiResponse.setError("No data found");
         } else {
-            apiResponse.setStatusCode ("200");
-            apiResponse.setStatus ("SUCCESS");
-            apiResponse.setData (posts);
+            apiResponse.setStatusCode("200");
+            apiResponse.setStatus("SUCCESS");
+            apiResponse.setData(posts);
         }
         return apiResponse;
     }
 
     /**
-     * @param postDTO
-     * @return
+     * Adds a new post to the store.
+     *
+     * @param postDTO The PostDTO containing the post data.
+     * @return ApiResponse containing the status and data.
      */
-    public ApiResponse addPost (@RequestBody PostDTO postDTO) {
-        ApiResponse apiResponse = new ApiResponse ();
-        Post post = PostMapper.INSTANCE.dtotoPost (postDTO);
-        String currency = post.getCurrency ();
-        System.out.println ("Currency is: " + currency);
-        BigDecimal convertedRate = currencyConvertionService.getConversionRate (currency, "INR");
-        System.out.println ("Converted rate is: " + convertedRate);
-        BigDecimal orginalAmount = BigDecimal.valueOf (post.getOriginalAmount ());
-        BigDecimal temp = orginalAmount.multiply (convertedRate);
-        post.setAmount (temp);
-        post.setDateTime (LocalDateTime.now ());
+    public ApiResponse addPost(@RequestBody PostDTO postDTO) {
+        ApiResponse apiResponse = new ApiResponse();
+        Post post = PostMapper.INSTANCE.dtotoPost(postDTO);
+        String currency = post.getCurrency();
+        System.out.println("Currency is: " + currency);
+        BigDecimal convertedRate = currencyConvertionService.getConversionRate(currency, "INR");
+        System.out.println("Converted rate is: " + convertedRate);
+        BigDecimal originalAmount = BigDecimal.valueOf(post.getOriginalAmount());
+        BigDecimal temp = originalAmount.multiply(convertedRate);
+        post.setAmount(temp);
+        post.setDateTime(LocalDateTime.now());
 
-        String id = repo.save (post).getId ();
-        if (StringUtils.hasText (id)) {
-            apiResponse.setData (id);
-            apiResponse.setStatusCode ("200");
-            apiResponse.setStatus ("SUCCESS");
+        String id = repo.save(post).getId();
+        if (StringUtils.hasText(id)) {
+            apiResponse.setData(id);
+            apiResponse.setStatusCode("200");
+            apiResponse.setStatus("SUCCESS");
         } else {
-            apiResponse.setErrorMsg ("Couldn't create");
-            apiResponse.setStatus ("429");
+            apiResponse.setErrorMsg("Couldn't create");
+            apiResponse.setStatus("429");
         }
         return apiResponse;
     }
 
     /**
-     * @param userId
-     * @return
+     * Deletes a post from the store based on the provided ID.
+     *
+     * @param userId The ID of the post to be deleted.
+     * @return ResponseEntity with the deletion status.
      */
-    @DeleteMapping ("/delete/{id}")
-    public ResponseEntity<?> deletePost (@PathVariable ("id") int userId) {
-        if (repo.existsById (String.valueOf (userId))) {
-            repo.deleteById (String.valueOf (userId));
-            return new ResponseEntity<> ("Post with ID " + userId + " deleted successfully", HttpStatus.OK);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable("id") int userId) {
+        if (repo.existsById(String.valueOf(userId))) {
+            repo.deleteById(String.valueOf(userId));
+            return new ResponseEntity<>("Post with ID " + userId + " deleted successfully", HttpStatus.OK);
         } else {
-            return new ResponseEntity<> ("Post with ID " + userId + " not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Post with ID " + userId + " not found", HttpStatus.NOT_FOUND);
         }
     }
 }

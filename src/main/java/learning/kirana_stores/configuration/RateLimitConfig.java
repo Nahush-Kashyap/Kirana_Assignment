@@ -13,36 +13,37 @@ import java.util.function.Supplier;
 
 @Configuration
 public class RateLimitConfig {
-    //autowiring dependencies
-
+    // Autowiring dependencies
     @Autowired
     public ProxyManager buckets;
 
     /**
-     * @param key
-     * @return
+     * Resolves and returns a Bucket based on the provided key.
+     * @param key The key used to identify the Bucket.
+     * @return A Bucket instance associated with the provided key.
      */
-    public Bucket resolveBucket (String key) {
-        Supplier<BucketConfiguration> configSupplier = getConfigSupplierForUser (key);
+    public Bucket resolveBucket(String key) {
+        Supplier<BucketConfiguration> configSupplier = getConfigSupplierForUser(key);
 
         // Does not always create a new bucket, but instead returns the existing one if it exists.
-        return buckets.builder ().build (key, configSupplier);
+        return buckets.builder().build(key, configSupplier);
     }
 
     /**
-     * @param key
-     * @return
+     * Generates a Supplier for BucketConfiguration based on the provided key.
+     * @param key The key used to identify the user.
+     * @return A Supplier of BucketConfiguration.
      */
-    private Supplier<BucketConfiguration> getConfigSupplierForUser (String key) {
-        //User user = userRepository.findById(userId);
-        Refill refill = Refill.intervally (10, Duration.ofMinutes (10));
-        //create 10 token bandwidth
-        Bandwidth limit = Bandwidth.classic (10, refill);
+    private Supplier<BucketConfiguration> getConfigSupplierForUser(String key) {
+        // Define the refill strategy with 10 tokens every 10 minutes
+        Refill refill = Refill.intervally(10, Duration.ofMinutes(10));
 
-        // Bandwidth limit = Bandwidth.
+        // Define the overall bandwidth limit using classic bandwidth model
+        Bandwidth limit = Bandwidth.classic(10, refill);
 
-        return () -> (BucketConfiguration.builder ()
-                .addLimit (limit)
-                .build ());
+        // Return a Supplier of BucketConfiguration
+        return () -> (BucketConfiguration.builder()
+                .addLimit(limit)
+                .build());
     }
 }

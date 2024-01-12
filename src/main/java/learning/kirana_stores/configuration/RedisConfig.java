@@ -16,44 +16,46 @@ import javax.cache.Caching;
 @Configuration
 public class RedisConfig {
     /**
-     * @return
+     * Bean to configure Redisson client.
+     * @return Config instance for Redisson.
      */
     @Bean
-    public Config config () {
-        Config config = new Config ();
-        config.useSingleServer ().setAddress ("redis://localhost:6379");
+    public Config config() {
+        Config config = new Config();
+        config.useSingleServer().setAddress("redis://localhost:6379");
         return config;
     }
 
     /**
-     * @param config
-     * @return
+     * Bean to create and configure the CacheManager using Redisson.
+     * @param config Redisson configuration.
+     * @return CacheManager instance.
      */
     @Bean
-    public CacheManager cacheManager1 (Config config) {
-        CacheManager manager = Caching.getCachingProvider ().getCacheManager ();
-        manager.createCache ("cache", RedissonConfiguration.fromConfig (config));
+    public CacheManager cacheManager1(Config config) {
+        CacheManager manager = Caching.getCachingProvider().getCacheManager();
+        manager.createCache("cache", RedissonConfiguration.fromConfig(config));
         return manager;
     }
 
     /**
-     * @param cacheManager1
-     * @return
+     * Bean to create a ProxyManager using JCacheProxyManager.
+     * @param cacheManager1 CacheManager instance.
+     * @return ProxyManager instance.
      */
     @Bean
-    ProxyManager<String> proxyManager (CacheManager cacheManager1) {
-        return new JCacheProxyManager<> (cacheManager1.getCache ("cache"));
+    ProxyManager<String> proxyManager(CacheManager cacheManager1) {
+        return new JCacheProxyManager<>(cacheManager1.getCache("cache"));
     }
 
     /**
-     * @param cacheManager1
-     * @return
+     * Primary bean for SyncCacheResolver using JCacheCacheResolver.
+     * @param cacheManager1 CacheManager instance.
+     * @return SyncCacheResolver instance.
      */
     @Bean
     @Primary
-    public SyncCacheResolver bucket4jCacheResolver (CacheManager cacheManager1) {
-        return new JCacheCacheResolver (cacheManager1);
+    public SyncCacheResolver bucket4jCacheResolver(CacheManager cacheManager1) {
+        return new JCacheCacheResolver(cacheManager1);
     }
-
-
 }

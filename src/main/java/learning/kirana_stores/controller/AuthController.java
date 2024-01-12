@@ -15,66 +15,73 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 public class AuthController {
+
     private final UserRepository userRepository;
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
-
     private final JwtUtils jwtUtils;
 
     /**
-     * @param userRepository
-     * @param authenticationManager
-     * @param userService
-     * @param jwtUtils
+     * Constructor for AuthController.
+     * @param userRepository Repository for User data.
+     * @param authenticationManager AuthenticationManager for handling authentication.
+     * @param userService Custom user service.
+     * @param jwtUtils JWT utility for token generation and validation.
      */
     @Autowired
-    public AuthController (UserRepository userRepository, AuthenticationManager authenticationManager,
-                           UserService userService,
-                           JwtUtils jwtUtils) {
+    public AuthController(UserRepository userRepository, AuthenticationManager authenticationManager,
+                          UserService userService, JwtUtils jwtUtils) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
         this.userService = userService;
         this.authenticationManager = authenticationManager;
     }
 
-
-    @PostMapping ("/signup")
-    private ResponseEntity<?> SignupClient (@RequestBody AuthenticationRequest authenticationRequest) {
-        String username = authenticationRequest.getUsername ();
-        String password = authenticationRequest.getPassword ();
-        UserModel user = userRepository.findByUsername (username);
+    /**
+     * Endpoint for user signup.
+     * @param authenticationRequest Request body containing username and password.
+     * @return ResponseEntity with success or error message.
+     */
+    @PostMapping("/signup")
+    private ResponseEntity<?> SignupClient(@RequestBody AuthenticationRequest authenticationRequest) {
+        String username = authenticationRequest.getUsername();
+        String password = authenticationRequest.getPassword();
+        UserModel user = userRepository.findByUsername(username);
         if (user != null) {
-            return ResponseEntity.badRequest ().body ("User already exists");
+            return ResponseEntity.badRequest().body("User already exists");
         }
 
-        UserModel userModel = new UserModel ();
-        userModel.setUsername (username);
-        userModel.setPassword (password);
+        UserModel userModel = new UserModel();
+        userModel.setUsername(username);
+        userModel.setPassword(password);
         try {
-            userRepository.save (userModel);
-            return ResponseEntity.ok (new AuthenticationResponse (username + " successfully signed up!!"));
+            userRepository.save(userModel);
+            return ResponseEntity.ok(new AuthenticationResponse(username + " successfully signed up!!"));
         } catch (Exception e) {
-            return ResponseEntity.ok (new AuthenticationResponse ("Unable to complete Signup"));
+            return ResponseEntity.ok(new AuthenticationResponse("Unable to complete Signup"));
         }
-
     }
 
-    @PostMapping ("/auth")
-    private ResponseEntity<?> authenticateClient (@RequestBody AuthenticationRequest authenticationRequest) {
-        String username = authenticationRequest.getUsername ();
-        String password = authenticationRequest.getPassword ();
+    /**
+     * Endpoint for user authentication.
+     * @param authenticationRequest Request body containing username and password.
+     * @return ResponseEntity with a JWT token or error message.
+     */
+    @PostMapping("/auth")
+    private ResponseEntity<?> authenticateClient(@RequestBody AuthenticationRequest authenticationRequest) {
+        String username = authenticationRequest.getUsername();
+        String password = authenticationRequest.getPassword();
         try {
-            authenticationManager.authenticate (new UsernamePasswordAuthenticationToken (username, password));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         } catch (Exception e) {
-            return ResponseEntity.ok (new AuthenticationResponse ("Error during Authentication"));
+            return ResponseEntity.ok(new AuthenticationResponse("Error during Authentication"));
         }
 
-        UserDetails loadedUser = userService.loadUserByUsername (username);
-        String generatedToken = jwtUtils.generateToken (loadedUser);
-        return ResponseEntity.ok (new AuthenticationResponse (generatedToken));
+        UserDetails loadedUser = userService.loadUserByUsername(username);
+        String generatedToken = jwtUtils.generateToken(loadedUser);
+        return ResponseEntity.ok(new AuthenticationResponse(generatedToken));
     }
 }

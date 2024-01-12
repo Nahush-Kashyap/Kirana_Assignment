@@ -18,17 +18,23 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
 
     /**
-     * @param s
-     * @return
-     * @throws UsernameNotFoundException
+     * Loads user details by username for authentication.
+     *
+     * @param username The username to load user details.
+     * @return UserDetails for the specified username.
+     * @throws UsernameNotFoundException If the username is not found.
      */
     @Override
-    public UserDetails loadUserByUsername (String s) throws UsernameNotFoundException {
-        UserModel userPresent = userRepository.findByUsername (s);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // Find the user in the repository based on the provided username
+        UserModel userPresent = userRepository.findByUsername(username);
+
+        // If user not found, throw UsernameNotFoundException
         if (userPresent == null) {
-            return null;
+            throw new UsernameNotFoundException("User not found with username: " + username);
         }
 
-        return new User (userPresent.getUsername (), userPresent.getPassword (), new ArrayList<> ());
+        // Return UserDetails with the found user's username, password, and an empty list of authorities
+        return new User(userPresent.getUsername(), userPresent.getPassword(), new ArrayList<>());
     }
 }
