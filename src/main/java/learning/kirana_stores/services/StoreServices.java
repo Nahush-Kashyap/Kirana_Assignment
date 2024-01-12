@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -59,6 +60,7 @@ public class StoreServices {
         BigDecimal orginalAmount = BigDecimal.valueOf (post.getOriginalAmount ());
         BigDecimal temp = orginalAmount.multiply (convertedRate);
         post.setAmount (temp);
+        post.setDateTime (LocalDateTime.now ());
 
         String id = repo.save (post).getId ();
         if (StringUtils.hasText (id)) {
